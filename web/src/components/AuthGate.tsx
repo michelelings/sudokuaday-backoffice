@@ -35,15 +35,18 @@ export function AuthGate({ children }: Props) {
   )
 
   if (!password) {
-    return (
-      <>
-        <div className="border-b border-amber-500/40 bg-amber-500/10 px-4 py-2 text-center text-sm text-amber-900 dark:text-amber-100">
-          Development mode: set <code className="rounded bg-black/10 px-1">VITE_BACKOFFICE_PASSWORD</code> to require
-          sign-in.
-        </div>
-        {children}
-      </>
-    )
+    if (import.meta.env.DEV) {
+      return (
+        <>
+          <div className="border-b border-amber-500/40 bg-amber-500/10 px-4 py-2 text-center text-sm text-amber-900 dark:text-amber-100">
+            Local dev: set <code className="rounded bg-black/10 px-1">VITE_BACKOFFICE_PASSWORD</code> to test the
+            sign-in screen.
+          </div>
+          {children}
+        </>
+      )
+    }
+    return <>{children}</>
   }
 
   if (!unlocked) {
