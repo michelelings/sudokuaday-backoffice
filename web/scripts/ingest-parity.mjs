@@ -4,11 +4,13 @@
  *
  * Usage:
  *   SUDOKUADAY_REPO_PATH=/path/to/sudokuaday.com node scripts/ingest-parity.mjs
- * Optional: SUDOKUADAY_REPO_SHA=abc1234 (record in snapshot only)
+ * Optional: SUDOKUADAY_REPO_SHA=abc1234 (record in snapshot only).
+ * Stale mirrors need meaningful git history; use a non-shallow clone or depth ≥ ~200 (see workflow).
  *
  * Writes: public/parity-snapshot.json
  */
 
+import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -35,6 +37,7 @@ const EN_EXCLUDE_TOP = new Set([
 const MAX_SITEMAP_ISSUES = 2000
 /** Cap rows shipped in JSON so the SPA stays small; counts remain exact in summary + metadataIssuesTotal */
 const MAX_METADATA_ISSUES_STORED = 800
+const MAX_FRESHNESS_ISSUES_STORED = 500
 const META_VALUE_MAX_LEN = 240
 
 function truncateMeta(s) {
@@ -160,6 +163,50 @@ function resolvePublicPathToRepoFile(repoRoot, urlPath) {
   return null
 }
 
+/**
+ * One `git log` pass: first time a path appears is its most recent commit (reverse chronological).
+ * @returns {Map<string, number>|null} path (posix) -> mtime ms
+ */
+function buildHtmlCommitTimeMap(repoRoot) {
+  if (!fs.existsSync(path.join(repoRoot, '.git'))) return null
+  let out
+  try {
+    out = execFileSync(
+      'git',
+      ['-C', repoRoot, 'log', '--format=%ct', '--name-only', '--no-merges'],
+      { encoding: 'utf8', maxBuffer: 120 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] },
+    )
+  } catch {
+    return null
+  }
+  const map = new Map()
+  let currentTsMs = null
+  for (const line of out.split('\n')) {
+    const t = line.trim()
+    if (t === '') continue
+    if (/^\d{9,12}$/.test(t)) {
+      const sec = parseInt(t, 10)
+      if (!Number.isNaN(sec)) currentTsMs = sec * 1000
+      continue
+    }
+    if (currentTsMs == null) continue
+    if (!t.endsWith('.html')) continue
+    const posix = t.replace(/\\/g, '/')
+    if (!map.has(posix)) map.set(posix, currentTsMs)
+  }
+  return map
+}
+
+function timeForPath(repoRoot, relPosix, commitMap) {
+  const g = commitMap?.get(relPosix)
+  if (g != null) return g
+  try {
+    return fs.statSync(path.join(repoRoot, ...relPosix.split('/'))).mtimeMs
+  } catch {
+    return null
+  }
+}
+
 function parseSitemapUrls(repoRoot) {
   const smPath = path.join(repoRoot, 'sitemap.xml')
   if (!fs.existsSync(smPath)) {
@@ -187,6 +234,19 @@ function main() {
     process.exit(1)
   }
 
+  let previousRunHistory = []
+  try {
+    if (fs.existsSync(OUT_FILE)) {
+      const prev = JSON.parse(fs.readFileSync(OUT_FILE, 'utf8'))
+      if (Array.isArray(prev.runHistory)) previousRunHistory = prev.runHistory
+    }
+  } catch {
+    /* ignore corrupt or empty */
+  }
+
+  const staleLagHours = Number(process.env.STALE_LAG_HOURS)
+  const lagMs = (Number.isFinite(staleLagHours) && staleLagHours >= 0 ? staleLagHours : 24) * 3600 * 1000
+
   const cfg = readConfig(resolved)
   const defaultLocale = cfg.defaultLocale ?? 'en'
   const supported = cfg.supportedLocales ?? []
@@ -203,7 +263,7 @@ function main() {
 
   const summary = {}
   for (const loc of nonEn) {
-    summary[loc] = { missing: 0, extra: 0, metadataMismatches: 0 }
+    summary[loc] = { missing: 0, extra: 0, metadataMismatches: 0, staleMirror: 0 }
   }
 
   for (const loc of nonEn) {
@@ -259,6 +319,37 @@ function main() {
     }
   }
 
+  const commitTimeMap = buildHtmlCommitTimeMap(resolved)
+
+  /** @type {{ type: 'stale_mirror'; locale: string; path: string; enModifiedAt: string; localeModifiedAt: string; lagHours: number }[]} */
+  const freshnessIssues = []
+  for (const loc of nonEn) {
+    const localePaths = collectLocalePaths(resolved, loc)
+    for (const p of englishPaths) {
+      if (!localePaths.has(p)) continue
+      const enRel = p
+      const locRel = `${loc}/${p}`
+      const enT = timeForPath(resolved, enRel, commitTimeMap)
+      const locT = timeForPath(resolved, locRel, commitTimeMap)
+      if (enT == null || locT == null) continue
+      if (enT > locT + lagMs) {
+        summary[loc].staleMirror += 1
+        const lagHours = Math.round((enT - locT) / 3600000)
+        freshnessIssues.push({
+          type: 'stale_mirror',
+          locale: loc,
+          path: p,
+          enModifiedAt: new Date(enT).toISOString(),
+          localeModifiedAt: new Date(locT).toISOString(),
+          lagHours,
+        })
+      }
+    }
+  }
+
+  const staleMirrorTotal = freshnessIssues.length
+  const freshnessIssuesStored = freshnessIssues.slice(0, MAX_FRESHNESS_ISSUES_STORED)
+
   const sitemapData = parseSitemapUrls(resolved)
   /** @type {{ type: 'sitemap_orphan'; urlPath: string; loc: string }[]} */
   const sitemapIssues = []
@@ -287,19 +378,28 @@ function main() {
   const metadataIssuesTotal = metadataIssues.length
   const metadataIssuesStored = metadataIssues.slice(0, MAX_METADATA_ISSUES_STORED)
 
+  const englishPathsSorted = Array.from(englishPaths).sort((a, b) => a.localeCompare(b))
+
+  const generatedAt = new Date().toISOString()
   const snapshot = {
-    generatedAt: new Date().toISOString(),
+    generatedAt,
     repoPath: resolved,
     repoSha: process.env.SUDOKUADAY_REPO_SHA || undefined,
+    staleLagHours: lagMs / 3600000,
     defaultLocale,
     locales: supported,
     nonDefaultLocales: nonEn,
     englishHtmlCount: englishPaths.size,
+    /** Repo-relative English HTML paths (for coverage matrix UI); mirrors live at `{locale}/{path}` */
+    englishPaths: englishPathsSorted,
     summary,
     issues,
     metadataIssues: metadataIssuesStored,
     metadataIssuesTotal,
     metadataIssuesCapped: metadataIssuesTotal > metadataIssuesStored.length,
+    freshnessIssues: freshnessIssuesStored,
+    staleMirrorTotal,
+    freshnessIssuesCapped: staleMirrorTotal > freshnessIssuesStored.length,
     sitemap:
       sitemapData.urlCount > 0
         ? { file: sitemapData.file, urlCount: sitemapData.urlCount }
@@ -307,10 +407,28 @@ function main() {
     sitemapIssues,
   }
 
+  const historyEntry = {
+    generatedAt,
+    repoSha: snapshot.repoSha,
+    pathIssueCount: issues.length,
+    metadataTotal: metadataIssuesTotal,
+    staleMirrorTotal,
+    englishHtmlCount: englishPaths.size,
+  }
+  const seenAt = new Set()
+  const runHistory = []
+  for (const e of [historyEntry, ...previousRunHistory]) {
+    if (seenAt.has(e.generatedAt)) continue
+    seenAt.add(e.generatedAt)
+    runHistory.push(e)
+    if (runHistory.length >= 40) break
+  }
+  snapshot.runHistory = runHistory
+
   fs.mkdirSync(path.dirname(OUT_FILE), { recursive: true })
   fs.writeFileSync(OUT_FILE, JSON.stringify(snapshot, null, 2), 'utf8')
   console.log(
-    `Wrote ${OUT_FILE} (path: ${issues.length}, metadata total: ${metadataIssuesTotal}, stored: ${metadataIssuesStored.length}, sitemap orphans: ${sitemapIssues.length}, English paths: ${englishPaths.size})`,
+    `Wrote ${OUT_FILE} (path: ${issues.length}, metadata total: ${metadataIssuesTotal}, stored meta: ${metadataIssuesStored.length}, stale mirror: ${staleMirrorTotal} (stored ${freshnessIssuesStored.length}), sitemap orphans: ${sitemapIssues.length}, English paths: ${englishPaths.size})`,
   )
 }
 

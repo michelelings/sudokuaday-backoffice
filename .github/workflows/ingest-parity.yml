@@ -22,8 +22,9 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
 
+      # Enough history for per-file commit times in stale-mirror detection (depth 1 = all files share one timestamp).
       - name: Clone sudokuaday.com (read-only)
-        run: git clone --depth 1 https://github.com/jipvandervelde/sudokuaday.com /tmp/sudokuaday-site
+        run: git clone --depth 400 https://github.com/jipvandervelde/sudokuaday.com /tmp/sudokuaday-site
 
       - name: Install web dependencies
         run: npm ci --prefix web

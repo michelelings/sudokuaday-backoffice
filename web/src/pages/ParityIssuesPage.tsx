@@ -8,9 +8,10 @@ import {
   getAllIssues,
   issuesToCsv,
   metadataTotal,
+  staleMirrorTotal,
   type IssueCategory,
 } from '../lib/issues'
-import { isMetadataIssue, isPathIssue, isSitemapIssue } from '../types/parity'
+import { isFreshnessIssue, isMetadataIssue, isPathIssue, isSitemapIssue } from '../types/parity'
 
 export function ParityIssuesPage() {
   const q = useQuery({
@@ -50,6 +51,7 @@ export function ParityIssuesPage() {
   const data = q.data
   const totalAll = getAllIssues(data).length
   const metaTotal = metadataTotal(data)
+  const staleTotal = staleMirrorTotal(data)
 
   return (
     <div className="space-y-6">
@@ -59,8 +61,8 @@ export function ParityIssuesPage() {
           <strong>Path:</strong> missing or extra HTML mirrors. <strong>Metadata:</strong> different title, description,
           or main <code className="rounded bg-black/10 px-1">h1</code> vs English for the same file pair.{' '}
           <strong>Sitemap:</strong> URL in committed <code className="rounded bg-black/10 px-1">sitemap.xml</code> with
-          no matching HTML file. With a <strong>locale</strong> filter, sitemap rows are hidden (they are not
-          per-locale).
+          no matching HTML file. <strong>Stale mirror:</strong> English file newer than the locale copy by more than the
+          ingest lag (git commit time, else mtime). With a <strong>locale</strong> filter, sitemap rows are hidden.
         </p>
       </div>
 
@@ -70,8 +72,9 @@ export function ParityIssuesPage() {
           <select
             value={category}
             onChange={(e) => {
-              setCategory(e.target.value as IssueCategory)
-              if (e.target.value !== 'all' && e.target.value !== 'path') setPathType('')
+              const v = e.target.value as IssueCategory
+              setCategory(v)
+              if (v !== 'all' && v !== 'path') setPathType('')
             }}
             className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
           >
@@ -79,6 +82,7 @@ export function ParityIssuesPage() {
             <option value="path">Path only</option>
             <option value="metadata">Metadata only</option>
             <option value="sitemap">Sitemap only</option>
+            <option value="freshness">Stale mirror only</option>
           </select>
         </label>
         <label className="flex flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-400">
@@ -134,9 +138,11 @@ export function ParityIssuesPage() {
         {category === 'all' && !localeFilter && !search && !pathType ? (
           <>
             {' '}
-            (of <span className="tabular-nums">{totalAll}</span> loaded; metadata mismatches total{' '}
+            (of <span className="tabular-nums">{totalAll}</span> loaded; metadata total{' '}
             <span className="tabular-nums">{metaTotal}</span>
-            {data.metadataIssuesCapped ? ', sample capped in JSON' : ''})
+            {data.metadataIssuesCapped ? ', meta sample capped' : ''}; stale mirrors total{' '}
+            <span className="tabular-nums">{staleTotal}</span>
+            {data.freshnessIssuesCapped ? ', stale sample capped' : ''})
           </>
         ) : null}
         .
@@ -219,6 +225,28 @@ export function ParityIssuesPage() {
                     <td className="px-3 py-2 text-xs text-slate-500">—</td>
                     <td className="px-3 py-2 font-mono text-xs break-all">{issue.urlPath}</td>
                     <td className="px-3 py-2 text-xs break-all text-slate-500">{issue.loc}</td>
+                  </tr>
+                )
+              }
+              if (isFreshnessIssue(issue)) {
+                return (
+                  <tr
+                    key={`f-${issue.locale}-${issue.path}-${idx}`}
+                    className="border-b border-slate-100 last:border-0 dark:border-slate-800"
+                  >
+                    <td className="px-3 py-2">
+                      <span className="rounded bg-cyan-100 px-1.5 py-0.5 text-xs font-medium text-cyan-900 dark:bg-cyan-950/60 dark:text-cyan-200">
+                        stale
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 font-mono text-xs">{issue.locale}</td>
+                    <td className="px-3 py-2 font-mono text-xs break-all">{issue.path}</td>
+                    <td className="px-3 py-2 text-xs text-slate-600 dark:text-slate-400">
+                      EN <span className="tabular-nums">{issue.lagHours}h</span> ahead · locale{' '}
+                      <time dateTime={issue.localeModifiedAt} className="whitespace-nowrap">
+                        {new Date(issue.localeModifiedAt).toLocaleDateString()}
+                      </time>
+                    </td>
                   </tr>
                 )
               }

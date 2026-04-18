@@ -248,15 +248,15 @@ The site repo and traffic are **too important to risk** from tooling mistakes. D
 ## 8. Milestones
 
 
-| Milestone | Deliverable | Status |
-| --------- | ----------- | ------ |
-| **M0** | Repo scaffold (Vite React TS), auth gate, nav; **noindex** + `robots.txt` (§7.1). | Done (`web/`, root `vercel.json`). |
-| **M1** | Paired HTML paths + missing/extra; **metadata** diff (title, description, `h1`); sample capped in JSON for bundle size. | Done (`web/scripts/ingest-parity.mjs`). |
-| **M2** | Dashboard, filters, **CSV export**, **sitemap** orphan check, `/diff` view; **GitHub Action** refreshes snapshot. | Done (`.github/workflows/ingest-parity.yml`). |
-| **M3** | Freshness / history (optional); tighter structural rules. | Not started. |
-| **M4** | GA4 connector + traffic by locale/path. | Not started. |
-| **M5** | GSC connector + landing/query views. | Not started. |
-| **M6** | Ahrefs *or* Semrush summary. | Not started. |
+| Milestone | Deliverable                                                                                                             | Status                                        |
+| --------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| **M0**    | Repo scaffold (Vite React TS), auth gate, nav; **noindex** + `robots.txt` (§7.1).                                       | Done (`web/`, root `vercel.json`).            |
+| **M1**    | Paired HTML paths + missing/extra; **metadata** diff (title, description, `h1`); sample capped in JSON for bundle size. | Done (`web/scripts/ingest-parity.mjs`).       |
+| **M2**    | Dashboard, filters, **CSV export**, **sitemap** orphan check, `/diff` view; **GitHub Action** refreshes snapshot.       | Done (`.github/workflows/ingest-parity.yml`). |
+| **M3**    | Stale mirrors (git-based lag vs locale), run history in snapshot, CI clone depth for accurate times.                      | Done.                                         |
+| **M4**    | GA4 connector + traffic by locale/path.                                                                                 | Not started.                                  |
+| **M5**    | GSC connector + landing/query views.                                                                                    | Not started.                                  |
+| **M6**    | Ahrefs *or* Semrush summary.                                                                                            | Not started.                                  |
 
 
 ---

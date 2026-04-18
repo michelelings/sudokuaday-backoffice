@@ -12,7 +12,7 @@ export function RootLayout() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+        <div className="mx-auto flex max-w-[min(96rem,calc(100vw-2rem))] flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div className="flex flex-col">
             <span className="text-sm font-semibold">Sudoku a Day</span>
             <span className="text-xs text-slate-500 dark:text-slate-400">Backoffice · read-only parity</span>
@@ -24,10 +24,13 @@ export function RootLayout() {
             <NavLink to="/parity" className={linkClass}>
               Parity issues
             </NavLink>
+            <NavLink to="/coverage" className={linkClass}>
+              Coverage
+            </NavLink>
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">
+      <main className="mx-auto max-w-[min(96rem,calc(100vw-2rem))] px-4 py-8">
         <Outlet />
       </main>
     </div>

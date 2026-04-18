@@ -1,13 +1,19 @@
 import type { ParityIssue, ParitySnapshot, PathIssue } from '../types/parity'
-import { isMetadataIssue, isPathIssue, isSitemapIssue } from '../types/parity'
+import {
+  isFreshnessIssue,
+  isMetadataIssue,
+  isPathIssue,
+  isSitemapIssue,
+} from '../types/parity'
 
-export type IssueCategory = 'all' | 'path' | 'metadata' | 'sitemap'
+export type IssueCategory = 'all' | 'path' | 'metadata' | 'sitemap' | 'freshness'
 
 export function getAllIssues(data: ParitySnapshot): ParityIssue[] {
   const path = data.issues ?? []
   const meta = data.metadataIssues ?? []
   const sm = data.sitemapIssues ?? []
-  return [...path, ...meta, ...sm]
+  const fr = data.freshnessIssues ?? []
+  return [...path, ...meta, ...sm, ...fr]
 }
 
 export function filterIssues(
@@ -21,6 +27,7 @@ export function filterIssues(
   if (category === 'path') rows = rows.filter(isPathIssue)
   else if (category === 'metadata') rows = rows.filter(isMetadataIssue)
   else if (category === 'sitemap') rows = rows.filter(isSitemapIssue)
+  else if (category === 'freshness') rows = rows.filter(isFreshnessIssue)
 
   if (locale) {
     rows = rows.filter((i) => {
@@ -35,7 +42,10 @@ export function filterIssues(
     } else if (category === 'all') {
       rows = rows.filter(
         (i) =>
-          (isPathIssue(i) && i.type === pathType) || isMetadataIssue(i) || isSitemapIssue(i),
+          (isPathIssue(i) && i.type === pathType) ||
+          isMetadataIssue(i) ||
+          isSitemapIssue(i) ||
+          isFreshnessIssue(i),
       )
     }
   }
@@ -63,12 +73,19 @@ export function metadataTotal(data: ParitySnapshot): number {
   return data.metadataIssues?.length ?? 0
 }
 
+export function staleMirrorTotal(data: ParitySnapshot): number {
+  if (typeof data.staleMirrorTotal === 'number') return data.staleMirrorTotal
+  return data.freshnessIssues?.length ?? 0
+}
+
 export function issuesToCsv(issues: ParityIssue[]): string {
-  const lines: string[] = ['type,locale,path,field,enValue,localeValue,urlPath,loc']
+  const lines: string[] = [
+    'type,locale,path,field,enValue,localeValue,urlPath,loc,enModifiedAt,localeModifiedAt,lagHours',
+  ]
   const esc = (s: string) => `"${s.replace(/"/g, '""')}"`
   for (const i of issues) {
     if (isPathIssue(i)) {
-      lines.push([i.type, i.locale, i.path, '', '', '', '', ''].map(esc).join(','))
+      lines.push([i.type, i.locale, i.path, '', '', '', '', '', '', '', ''].map(esc).join(','))
     } else if (isMetadataIssue(i)) {
       lines.push(
         [
@@ -80,12 +97,35 @@ export function issuesToCsv(issues: ParityIssue[]): string {
           i.localeValue,
           '',
           '',
+          '',
+          '',
+          '',
         ]
           .map(esc)
           .join(','),
       )
     } else if (isSitemapIssue(i)) {
-      lines.push(['sitemap_orphan', '', '', '', '', '', i.urlPath, i.loc].map(esc).join(','))
+      lines.push(
+        ['sitemap_orphan', '', '', '', '', '', i.urlPath, i.loc, '', '', ''].map(esc).join(','),
+      )
+    } else if (isFreshnessIssue(i)) {
+      lines.push(
+        [
+          'stale_mirror',
+          i.locale,
+          i.path,
+          '',
+          '',
+          '',
+          '',
+          '',
+          i.enModifiedAt,
+          i.localeModifiedAt,
+          String(i.lagHours),
+        ]
+          .map(esc)
+          .join(','),
+      )
     }
   }
   return lines.join('\n')
