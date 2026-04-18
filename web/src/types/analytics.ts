@@ -75,6 +75,78 @@ export type AnalyticsSnapshot = {
   seo: SeoSummary | null
 }
 
+function asFiniteNumber(x: unknown, fallback = 0): number {
+  if (typeof x === 'number' && Number.isFinite(x)) return x
+  if (typeof x === 'string' && x.trim() !== '') {
+    const n = Number(x)
+    if (Number.isFinite(n)) return n
+  }
+  return fallback
+}
+
+function sanitizeGscQueryRow(row: unknown): GscQueryRow | null {
+  if (!row || typeof row !== 'object') return null
+  const r = row as Record<string, unknown>
+  if (typeof r.query !== 'string' || !r.query) return null
+  const ctrRaw = r.ctr
+  let ctr: number | undefined
+  if (typeof ctrRaw === 'number' && Number.isFinite(ctrRaw)) ctr = ctrRaw
+  else if (typeof ctrRaw === 'string' && ctrRaw.trim() !== '') {
+    const n = Number(ctrRaw)
+    if (Number.isFinite(n)) ctr = n
+  }
+  const posRaw = r.position
+  let position: number | undefined
+  if (typeof posRaw === 'number' && Number.isFinite(posRaw)) position = posRaw
+  else if (typeof posRaw === 'string' && posRaw.trim() !== '') {
+    const n = Number(posRaw)
+    if (Number.isFinite(n)) position = n
+  }
+  return {
+    query: r.query,
+    clicks: asFiniteNumber(r.clicks),
+    impressions: asFiniteNumber(r.impressions),
+    ...(ctr !== undefined ? { ctr } : {}),
+    ...(position !== undefined ? { position } : {}),
+    ...(typeof r.path === 'string' && r.path ? { path: r.path } : {}),
+  }
+}
+
+function sanitizeGscPageRow(row: unknown): GscPageRow | null {
+  if (!row || typeof row !== 'object') return null
+  const r = row as Record<string, unknown>
+  if (typeof r.path !== 'string' || !r.path) return null
+  return {
+    path: r.path,
+    clicks: asFiniteNumber(r.clicks),
+    impressions: asFiniteNumber(r.impressions),
+  }
+}
+
+function sanitizeSeoKeywordRow(row: unknown): SeoKeywordRow | null {
+  if (!row || typeof row !== 'object') return null
+  const r = row as Record<string, unknown>
+  if (typeof r.keyword !== 'string' || !r.keyword) return null
+  const volRaw = r.volume
+  let volume: number | undefined
+  if (volRaw != null) {
+    const v = asFiniteNumber(volRaw, Number.NaN)
+    if (Number.isFinite(v)) volume = v
+  }
+  const posRaw = r.position
+  let position: number | undefined
+  if (posRaw != null) {
+    const p = asFiniteNumber(posRaw, Number.NaN)
+    if (Number.isFinite(p)) position = p
+  }
+  return {
+    keyword: r.keyword,
+    ...(volume !== undefined ? { volume } : {}),
+    ...(position !== undefined ? { position } : {}),
+    ...(typeof r.url === 'string' && r.url ? { url: r.url } : {}),
+  }
+}
+
 export const EMPTY_ANALYTICS_SNAPSHOT: AnalyticsSnapshot = {
   schemaVersion: 1,
   generatedAt: null,
@@ -170,10 +242,14 @@ export function mergeAnalyticsSnapshot(raw: unknown): AnalyticsSnapshot {
       sc && typeof sc === 'object'
         ? {
             topQueries: Array.isArray((sc as SearchConsoleSummary).topQueries)
-              ? (sc as SearchConsoleSummary).topQueries
+              ? ((sc as SearchConsoleSummary).topQueries as unknown[])
+                  .map(sanitizeGscQueryRow)
+                  .filter((x): x is GscQueryRow => x != null)
               : [],
             topPages: Array.isArray((sc as SearchConsoleSummary).topPages)
-              ? (sc as SearchConsoleSummary).topPages
+              ? ((sc as SearchConsoleSummary).topPages as unknown[])
+                  .map(sanitizeGscPageRow)
+                  .filter((x): x is GscPageRow => x != null)
               : [],
             ...((sc as SearchConsoleSummary).note
               ? { note: String((sc as SearchConsoleSummary).note) }
@@ -192,7 +268,9 @@ export function mergeAnalyticsSnapshot(raw: unknown): AnalyticsSnapshot {
         ? {
             vendor: (seo as SeoSummary).vendor,
             keywordsSample: Array.isArray((seo as SeoSummary).keywordsSample)
-              ? (seo as SeoSummary).keywordsSample
+              ? ((seo as SeoSummary).keywordsSample as unknown[])
+                  .map(sanitizeSeoKeywordRow)
+                  .filter((x): x is SeoKeywordRow => x != null)
               : [],
             ...((seo as SeoSummary).note ? { note: String((seo as SeoSummary).note) } : {}),
           }

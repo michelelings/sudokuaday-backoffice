@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { fetchParitySnapshot } from '../api/parity'
+import { liveSiteLinkClassName, localeLiveUrl } from '../lib/siteUrls'
 import { metadataTotal, staleMirrorTotal } from '../lib/issues'
 
 export function DashboardPage() {
@@ -170,7 +171,17 @@ export function DashboardPage() {
                 const s = data.summary[loc] ?? { missing: 0, extra: 0, metadataMismatches: 0, staleMirror: 0 }
                 return (
                   <tr key={loc} className="border-b border-slate-100 last:border-0 dark:border-slate-800">
-                    <td className="px-4 py-3 font-mono text-xs">{loc}</td>
+                    <td className="px-4 py-3 font-mono text-xs">
+                      <a
+                        href={localeLiveUrl(loc, 'index.html')}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={liveSiteLinkClassName}
+                        title={`Open ${loc} homepage`}
+                      >
+                        {loc}
+                      </a>
+                    </td>
                     <td className="px-4 py-3 tabular-nums text-red-700 dark:text-red-400">{s.missing}</td>
                     <td className="px-4 py-3 tabular-nums text-amber-700 dark:text-amber-400">{s.extra}</td>
                     <td className="px-4 py-3 tabular-nums text-violet-700 dark:text-violet-400">
@@ -188,13 +199,13 @@ export function DashboardPage() {
         <p className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
           <Link
             to="/parity"
-            className="text-sm font-medium text-slate-900 underline decoration-slate-300 underline-offset-4 hover:decoration-slate-900 dark:text-slate-100 dark:decoration-slate-600 dark:hover:decoration-slate-100"
+            className="text-sm font-medium text-slate-900 no-underline hover:text-slate-700 dark:text-slate-100 dark:hover:text-slate-300"
           >
             Browse and export issues →
           </Link>
           <Link
             to="/analytics"
-            className="text-sm font-medium text-slate-900 underline decoration-slate-300 underline-offset-4 hover:decoration-slate-900 dark:text-slate-100 dark:decoration-slate-600 dark:hover:decoration-slate-100"
+            className="text-sm font-medium text-slate-900 no-underline hover:text-slate-700 dark:text-slate-100 dark:hover:text-slate-300"
           >
             Analytics and SEO (prep) →
           </Link>

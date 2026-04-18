@@ -1,5 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { fetchAnalyticsSnapshot } from '../../api/analytics'
+import { gscPagesToCsv, gscQueriesToCsv } from '../../lib/analyticsCsv'
+import { downloadTextFile } from '../../lib/issues'
+import { hrefFromSnapshotPathOrUrl, liveSiteLinkClassName } from '../../lib/siteUrls'
 
 export function AnalyticsSearchConsolePage() {
   const q = useQuery({
@@ -8,9 +11,15 @@ export function AnalyticsSearchConsolePage() {
     staleTime: 60_000,
   })
 
-  const data = q.data
-  if (!data) return <p className="text-sm text-slate-600 dark:text-slate-400">Loading…</p>
+  if (q.isPending) {
+    return <p className="text-sm text-slate-600 dark:text-slate-400">Loading…</p>
+  }
 
+  if (q.isError) {
+    return <p className="text-sm text-red-700 dark:text-red-400">{(q.error as Error).message}</p>
+  }
+
+  const data = q.data!
   const sc = data.searchConsole
   const hasQueries = Boolean(sc?.topQueries?.length)
   const hasPages = Boolean(sc?.topPages?.length)
@@ -29,11 +38,28 @@ export function AnalyticsSearchConsolePage() {
     )
   }
 
+  const stamp = new Date().toISOString().slice(0, 10)
+
   return (
     <div className="space-y-8">
       {hasQueries ? (
         <div>
-          <h2 className="mb-2 text-lg font-semibold">Top queries</h2>
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-semibold">Top queries</h2>
+            <button
+              type="button"
+              onClick={() =>
+                downloadTextFile(
+                  `analytics-gsc-queries-${stamp}.csv`,
+                  gscQueriesToCsv(sc!.topQueries),
+                  'text/csv;charset=utf-8',
+                )
+              }
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+            >
+              Export CSV
+            </button>
+          </div>
           <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
             <table className="w-full min-w-[28rem] text-left text-sm">
               <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-600 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
@@ -49,8 +75,8 @@ export function AnalyticsSearchConsolePage() {
                 {sc!.topQueries.map((r, i) => (
                   <tr key={`${r.query}-${i}`} className="border-b border-slate-100 dark:border-slate-800">
                     <td className="px-3 py-2">{r.query}</td>
-                    <td className="px-3 py-2 tabular-nums">{r.clicks}</td>
-                    <td className="px-3 py-2 tabular-nums">{r.impressions}</td>
+                    <td className="px-3 py-2 tabular-nums">{r.clicks.toLocaleString()}</td>
+                    <td className="px-3 py-2 tabular-nums">{r.impressions.toLocaleString()}</td>
                     <td className="px-3 py-2 tabular-nums">{r.ctr != null ? `${(r.ctr * 100).toFixed(1)}%` : '—'}</td>
                     <td className="px-3 py-2 tabular-nums">{r.position != null ? r.position.toFixed(1) : '—'}</td>
                   </tr>
@@ -62,7 +88,22 @@ export function AnalyticsSearchConsolePage() {
       ) : null}
       {hasPages ? (
         <div>
-          <h2 className="mb-2 text-lg font-semibold">Top pages</h2>
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-semibold">Top pages</h2>
+            <button
+              type="button"
+              onClick={() =>
+                downloadTextFile(
+                  `analytics-gsc-pages-${stamp}.csv`,
+                  gscPagesToCsv(sc!.topPages),
+                  'text/csv;charset=utf-8',
+                )
+              }
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+            >
+              Export CSV
+            </button>
+          </div>
           <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
             <table className="w-full min-w-[28rem] text-left text-sm">
               <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-600 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
@@ -75,9 +116,18 @@ export function AnalyticsSearchConsolePage() {
               <tbody>
                 {sc!.topPages.map((r, i) => (
                   <tr key={`${r.path}-${i}`} className="border-b border-slate-100 dark:border-slate-800">
-                    <td className="px-3 py-2 font-mono text-xs break-all">{r.path}</td>
-                    <td className="px-3 py-2 tabular-nums">{r.clicks}</td>
-                    <td className="px-3 py-2 tabular-nums">{r.impressions}</td>
+                    <td className="px-3 py-2 font-mono text-xs break-all">
+                      <a
+                        href={hrefFromSnapshotPathOrUrl(r.path)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={liveSiteLinkClassName}
+                      >
+                        {r.path}
+                      </a>
+                    </td>
+                    <td className="px-3 py-2 tabular-nums">{r.clicks.toLocaleString()}</td>
+                    <td className="px-3 py-2 tabular-nums">{r.impressions.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>

@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { fetchParitySnapshot } from '../api/parity'
+import { englishLiveUrl, liveSiteLinkClassName, localeLiveUrl } from '../lib/siteUrls'
 
 export function DiffPage() {
   const [sp] = useSearchParams()
@@ -25,7 +26,7 @@ export function DiffPage() {
       <div className="space-y-4">
         <h1 className="text-2xl font-semibold tracking-tight">Metadata diff</h1>
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          Open this page from a <Link to="/parity" className="underline">parity issue</Link> row (metadata link), or add{' '}
+          Open this page from a <Link to="/parity" className="font-medium text-slate-800 hover:text-slate-600 dark:text-slate-200 dark:hover:text-slate-400">parity issue</Link> row (metadata link), or add{' '}
           <code className="rounded bg-black/10 px-1">?locale=de&amp;path=benefits-of-sudoku.html</code> to the URL.
         </p>
       </div>
@@ -39,7 +40,7 @@ export function DiffPage() {
     <div className="space-y-6">
       <div>
         <p className="text-xs text-slate-500">
-          <Link to="/parity" className="font-medium text-slate-800 underline dark:text-slate-200">
+          <Link to="/parity" className="font-medium text-slate-800 hover:text-slate-600 dark:text-slate-200 dark:hover:text-slate-400">
             ← Parity issues
           </Link>
         </p>
@@ -47,6 +48,24 @@ export function DiffPage() {
         <p className="mt-1 font-mono text-sm text-slate-600 dark:text-slate-400">
           <span className="text-slate-500">locale:</span> {locale}{' '}
           <span className="text-slate-500">path:</span> {filePath}
+        </p>
+        <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          <a
+            href={englishLiveUrl(filePath)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={liveSiteLinkClassName}
+          >
+            Open English page
+          </a>
+          <a
+            href={localeLiveUrl(locale, filePath)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={liveSiteLinkClassName}
+          >
+            Open {locale} page
+          </a>
         </p>
       </div>
 

@@ -1,12 +1,149 @@
 {
   "schemaVersion": 1,
-  "generatedAt": null,
+  "generatedAt": "2026-04-15T12:00:00.000Z",
   "sources": {
-    "ga4": { "configured": false },
-    "gsc": { "configured": false },
-    "seo": { "configured": false, "vendor": null }
+    "ga4": {
+      "configured": true,
+      "lastSyncedAt": "2026-04-15T11:30:00.000Z"
+    },
+    "gsc": {
+      "configured": true,
+      "lastSyncedAt": "2026-04-15T10:15:00.000Z"
+    },
+    "seo": {
+      "configured": true,
+      "vendor": "ahrefs",
+      "lastSyncedAt": "2026-04-14T09:00:00.000Z"
+    }
   },
-  "traffic": null,
-  "searchConsole": null,
-  "seo": null
+  "traffic": {
+    "note": "Illustrative fixture only — not live GA4. Replace via Data API job or BFF. dimensions.locale aligns with parity locales when you map GA4 to site language.",
+    "series": [
+      {
+        "metric_key": "sessions",
+        "value": 18240,
+        "source": "ga4",
+        "date": "2026-04-14",
+        "dimensions": { "locale": "en", "pagePath": "/" }
+      },
+      {
+        "metric_key": "sessions",
+        "value": 3210,
+        "source": "ga4",
+        "date": "2026-04-14",
+        "dimensions": { "locale": "nl", "pagePath": "/nl/" }
+      },
+      {
+        "metric_key": "sessions",
+        "value": 2980,
+        "source": "ga4",
+        "date": "2026-04-14",
+        "dimensions": { "locale": "de", "pagePath": "/de/" }
+      },
+      {
+        "metric_key": "sessions",
+        "value": 17600,
+        "source": "ga4",
+        "date": "2026-04-13",
+        "dimensions": { "locale": "en", "pagePath": "/" }
+      },
+      {
+        "metric_key": "sessions",
+        "value": 3055,
+        "source": "ga4",
+        "date": "2026-04-13",
+        "dimensions": { "locale": "nl", "pagePath": "/nl/" }
+      },
+      {
+        "metric_key": "sessions",
+        "value": 2910,
+        "source": "ga4",
+        "date": "2026-04-13",
+        "dimensions": { "locale": "de", "pagePath": "/de/" }
+      },
+      {
+        "metric_key": "screenPageViews",
+        "value": 45200,
+        "source": "ga4",
+        "date": "2026-04-14",
+        "dimensions": { "locale": "en" }
+      },
+      {
+        "metric_key": "screenPageViews",
+        "value": 9100,
+        "source": "ga4",
+        "date": "2026-04-14",
+        "dimensions": { "locale": "nl" }
+      },
+      {
+        "metric_key": "screenPageViews",
+        "value": 8400,
+        "source": "ga4",
+        "date": "2026-04-14",
+        "dimensions": { "locale": "de" }
+      }
+    ]
+  },
+  "searchConsole": {
+    "note": "Illustrative GSC sample — paths are site-relative for link helpers.",
+    "topQueries": [
+      {
+        "query": "sudoku daily free",
+        "clicks": 4200,
+        "impressions": 92000,
+        "ctr": 0.046,
+        "position": 5.2
+      },
+      {
+        "query": "printable sudoku pdf",
+        "clicks": 2100,
+        "impressions": 41000,
+        "ctr": 0.051,
+        "position": 6.8
+      },
+      {
+        "query": "sudoku strategies x wing",
+        "clicks": 890,
+        "impressions": 12000,
+        "ctr": 0.074,
+        "position": 4.1
+      }
+    ],
+    "topPages": [
+      { "path": "/", "clicks": 12000, "impressions": 240000 },
+      { "path": "/daily-sudoku/", "clicks": 5600, "impressions": 88000 },
+      { "path": "/nl/", "clicks": 1800, "impressions": 42000 },
+      { "path": "/sudoku-strategies/x-wing.html", "clicks": 950, "impressions": 14000 }
+    ]
+  },
+  "seo": {
+    "vendor": "ahrefs",
+    "note": "Illustrative Ahrefs-style sample — expand fields when a real connector lands.",
+    "keywordsSample": [
+      {
+        "keyword": "free sudoku online",
+        "volume": 74000,
+        "position": 8,
+        "url": "/"
+      },
+      {
+        "keyword": "daily sudoku puzzle",
+        "volume": 12000,
+        "position": 12,
+        "url": "/daily-sudoku/"
+      },
+      {
+        "keyword": "sudoku printable",
+        "volume": 33000,
+        "position": 15,
+        "url": "/printable/"
+      },
+      {
+        "keyword": "how to play sudoku",
+        "volume": 8100,
+        "position": 6,
+        "url": "/how-to-play/"
+      }
+    ]
+  }
 }

@@ -15,8 +15,9 @@ export function AnalyticsLayout() {
         <h1 className="text-2xl font-semibold tracking-tight">Analytics and SEO</h1>
         <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
           These screens read an optional static file{' '}
-          <code className="rounded bg-black/10 px-1">analytics-snapshot.json</code> (same idea as parity). Connectors
-          are not enabled yet — you will not see errors, only empty states until a job or BFF fills the snapshot.
+          <code className="rounded bg-black/10 px-1">analytics-snapshot.json</code> (same idea as parity). The committed
+          file may include an <strong>illustrative fixture</strong> so tables and CSV export are testable; replace it with
+          real connector output in CI or a BFF. Missing or invalid JSON still loads safely (empty snapshot).
         </p>
       </div>
       <nav className="flex flex-wrap gap-1 border-b border-slate-200 pb-2 dark:border-slate-800">

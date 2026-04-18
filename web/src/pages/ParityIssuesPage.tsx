@@ -11,6 +11,12 @@ import {
   staleMirrorTotal,
   type IssueCategory,
 } from '../lib/issues'
+import {
+  englishLiveUrl,
+  hrefFromSnapshotPathOrUrl,
+  liveSiteLinkClassName,
+  localeLiveUrl,
+} from '../lib/siteUrls'
 import { isFreshnessIssue, isMetadataIssue, isPathIssue, isSitemapIssue } from '../types/parity'
 
 export function ParityIssuesPage() {
@@ -178,7 +184,28 @@ export function ParityIssuesPage() {
                       </span>
                     </td>
                     <td className="px-3 py-2 font-mono text-xs">{issue.locale}</td>
-                    <td className="px-3 py-2 font-mono text-xs break-all">{issue.path}</td>
+                    <td className="px-3 py-2 font-mono text-xs break-all">
+                      {issue.type === 'missing' ? (
+                        <a
+                          href={englishLiveUrl(issue.path)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={liveSiteLinkClassName}
+                        >
+                          {issue.path}
+                        </a>
+                      ) : (
+                        <a
+                          href={localeLiveUrl(issue.locale, issue.path)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={liveSiteLinkClassName}
+                          title="Locale-only page (no English counterpart)"
+                        >
+                          {issue.path}
+                        </a>
+                      )}
+                    </td>
                     <td className="px-3 py-2 text-xs text-slate-500">—</td>
                   </tr>
                 )
@@ -197,9 +224,22 @@ export function ParityIssuesPage() {
                     </td>
                     <td className="px-3 py-2 font-mono text-xs">{issue.locale}</td>
                     <td className="px-3 py-2 font-mono text-xs break-all">
-                      <Link to={to} className="text-violet-800 underline decoration-violet-300 underline-offset-2 dark:text-violet-300">
-                        {issue.path}
-                      </Link>
+                      <span className="inline-flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                        <a
+                          href={englishLiveUrl(issue.path)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={liveSiteLinkClassName}
+                        >
+                          {issue.path}
+                        </a>
+                        <Link
+                          to={to}
+                          className="font-medium text-violet-800 no-underline hover:text-violet-950 dark:text-violet-300 dark:hover:text-violet-200"
+                        >
+                          Diff
+                        </Link>
+                      </span>
                     </td>
                     <td className="px-3 py-2 text-xs text-slate-600 dark:text-slate-400">
                       <span className="font-medium">{issue.field}</span>:{' '}
@@ -223,8 +263,26 @@ export function ParityIssuesPage() {
                       </span>
                     </td>
                     <td className="px-3 py-2 text-xs text-slate-500">—</td>
-                    <td className="px-3 py-2 font-mono text-xs break-all">{issue.urlPath}</td>
-                    <td className="px-3 py-2 text-xs break-all text-slate-500">{issue.loc}</td>
+                    <td className="px-3 py-2 font-mono text-xs break-all">
+                      <a
+                        href={hrefFromSnapshotPathOrUrl(issue.urlPath)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={liveSiteLinkClassName}
+                      >
+                        {issue.urlPath}
+                      </a>
+                    </td>
+                    <td className="px-3 py-2 text-xs break-all text-slate-500">
+                      <a
+                        href={issue.loc}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`${liveSiteLinkClassName} text-slate-600 dark:text-slate-400`}
+                      >
+                        {issue.loc}
+                      </a>
+                    </td>
                   </tr>
                 )
               }
@@ -240,7 +298,26 @@ export function ParityIssuesPage() {
                       </span>
                     </td>
                     <td className="px-3 py-2 font-mono text-xs">{issue.locale}</td>
-                    <td className="px-3 py-2 font-mono text-xs break-all">{issue.path}</td>
+                    <td className="px-3 py-2 font-mono text-xs break-all">
+                      <span className="inline-flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                        <a
+                          href={englishLiveUrl(issue.path)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={liveSiteLinkClassName}
+                        >
+                          {issue.path}
+                        </a>
+                        <a
+                          href={localeLiveUrl(issue.locale, issue.path)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`${liveSiteLinkClassName} text-xs font-normal`}
+                        >
+                          ({issue.locale})
+                        </a>
+                      </span>
+                    </td>
                     <td className="px-3 py-2 text-xs text-slate-600 dark:text-slate-400">
                       EN <span className="tabular-nums">{issue.lagHours}h</span> ahead · locale{' '}
                       <time dateTime={issue.localeModifiedAt} className="whitespace-nowrap">
