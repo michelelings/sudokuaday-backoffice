@@ -63,9 +63,9 @@ export function ParityCoveragePage() {
           <strong>0–100 score</strong> when the mirror exists: starts at 100, minus 20 per mismatched metadata field
           (title, description, <code className="rounded bg-black/10 px-1">h1</code>) found in this snapshot, minus 25 if
           the mirror is <strong>stale</strong> (English newer than locale past ingest lag).{' '}
-          <span className="text-slate-500">“—”</span> means missing file. Last column is the{' '}
-          <strong>mean score across all locales</strong> — missing mirrors count as 0, so 100 only if every translation
-          exists and scores 100. Hover a cell for details.
+          <span className="text-slate-500">“—”</span> means missing file. The sticky <strong>Avg</strong> column (after the
+          path) is the <strong>mean score across all locales</strong> — missing mirrors count as 0, so 100 only if every
+          translation exists and scores 100. Hover a cell for details.
         </p>
         <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-600 dark:text-slate-400">
           <span className="inline-flex items-center gap-1.5">
@@ -137,9 +137,16 @@ export function ParityCoveragePage() {
             <tr className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/80">
               <th
                 scope="col"
-                className="sticky left-0 z-20 whitespace-nowrap border-r border-slate-200 bg-slate-50 px-3 py-2 font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-950/80 dark:text-slate-200"
+                className="sticky left-0 z-30 w-[28rem] min-w-[28rem] max-w-[28rem] border-r border-slate-200 bg-slate-50 px-3 py-2 font-semibold text-slate-700 shadow-[2px_0_6px_-4px_rgba(0,0,0,0.12)] dark:border-slate-800 dark:bg-slate-950/80 dark:text-slate-200 dark:shadow-[2px_0_6px_-4px_rgba(0,0,0,0.4)]"
               >
                 English path
+              </th>
+              <th
+                scope="col"
+                className="sticky left-[28rem] z-30 min-w-[3.5rem] border-r border-slate-200 bg-slate-50 px-2 py-2 text-center font-semibold text-slate-600 shadow-[2px_0_6px_-4px_rgba(0,0,0,0.12)] dark:border-slate-800 dark:bg-slate-950/80 dark:text-slate-400 dark:shadow-[2px_0_6px_-4px_rgba(0,0,0,0.4)]"
+                title="Mean over all locales; missing mirrors count as 0"
+              >
+                Avg
               </th>
               {locales.map((loc) => (
                 <th
@@ -151,13 +158,6 @@ export function ParityCoveragePage() {
                   {loc}
                 </th>
               ))}
-              <th
-                scope="col"
-                className="min-w-[3.5rem] border-l border-slate-200 px-2 py-2 text-center font-semibold text-slate-600 dark:border-slate-700 dark:text-slate-400"
-                title="Mean over all locales; missing mirrors count as 0"
-              >
-                Avg
-              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -167,10 +167,10 @@ export function ParityCoveragePage() {
               )
               const avg = rowAverageScore(localeCells)
               return (
-                <tr key={path} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
+                <tr key={path} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
                   <th
                     scope="row"
-                    className="sticky left-0 z-10 max-w-[28rem] truncate border-r border-slate-200 bg-white px-3 py-1.5 font-normal dark:border-slate-800 dark:bg-slate-900"
+                    className="sticky left-0 z-10 w-[28rem] min-w-[28rem] max-w-[28rem] truncate border-r border-slate-200 bg-white px-3 py-1.5 font-normal shadow-[2px_0_6px_-4px_rgba(0,0,0,0.08)] group-hover:bg-slate-50/80 dark:border-slate-800 dark:bg-slate-900 dark:shadow-[2px_0_6px_-4px_rgba(0,0,0,0.35)] dark:group-hover:bg-slate-800/40"
                     title={path}
                   >
                     <a
@@ -182,6 +182,20 @@ export function ParityCoveragePage() {
                       {path}
                     </a>
                   </th>
+                  <td
+                    className="sticky left-[28rem] z-10 border-r border-slate-200 bg-white px-1 py-1 text-center shadow-[2px_0_6px_-4px_rgba(0,0,0,0.08)] group-hover:bg-slate-50/80 dark:border-slate-800 dark:bg-slate-900 dark:shadow-[2px_0_6px_-4px_rgba(0,0,0,0.35)] dark:group-hover:bg-slate-800/40"
+                  >
+                    {avg == null ? (
+                      <span className="text-xs text-slate-400">—</span>
+                    ) : (
+                      <span
+                        className={`inline-flex min-w-[2.5rem] justify-center rounded px-1.5 py-0.5 text-xs font-semibold tabular-nums ${scoreCellClass(avg, false)}`}
+                        title={`Mean over all ${locales.length} locales (missing = 0): ${avg}`}
+                      >
+                        {avg}
+                      </span>
+                    )}
+                  </td>
                   {locales.map((loc, i) => {
                     const cell = localeCells[i]!
                     const href = localeLiveUrl(loc, path)
@@ -213,18 +227,6 @@ export function ParityCoveragePage() {
                       </td>
                     )
                   })}
-                  <td className="border-l border-slate-200 px-1 py-1 text-center dark:border-slate-700">
-                    {avg == null ? (
-                      <span className="text-xs text-slate-400">—</span>
-                    ) : (
-                      <span
-                        className={`inline-flex min-w-[2.5rem] justify-center rounded px-1.5 py-0.5 text-xs font-semibold tabular-nums ${scoreCellClass(avg, false)}`}
-                        title={`Mean over all ${locales.length} locales (missing = 0): ${avg}`}
-                      >
-                        {avg}
-                      </span>
-                    )}
-                  </td>
                 </tr>
               )
             })}
