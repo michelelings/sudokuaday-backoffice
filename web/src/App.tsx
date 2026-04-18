@@ -8,6 +8,7 @@ import { AnalyticsLayout } from './pages/analytics/AnalyticsLayout'
 import { AnalyticsOverviewPage } from './pages/analytics/AnalyticsOverviewPage'
 import { AnalyticsSearchConsolePage } from './pages/analytics/AnalyticsSearchConsolePage'
 import { AnalyticsSeoPage } from './pages/analytics/AnalyticsSeoPage'
+import { AnalyticsPagesPage } from './pages/analytics/AnalyticsPagesPage'
 import { AnalyticsTrafficPage } from './pages/analytics/AnalyticsTrafficPage'
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="coverage" element={<ParityCoveragePage />} />
         <Route path="analytics" element={<AnalyticsLayout />}>
           <Route index element={<AnalyticsOverviewPage />} />
+          <Route path="pages" element={<AnalyticsPagesPage />} />
           <Route path="traffic" element={<AnalyticsTrafficPage />} />
           <Route path="search-console" element={<AnalyticsSearchConsolePage />} />
           <Route path="seo" element={<AnalyticsSeoPage />} />

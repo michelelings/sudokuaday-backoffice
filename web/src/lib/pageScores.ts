@@ -78,6 +78,52 @@ export function rowAverageScore(cells: LocaleCellScore[]): number | null {
   return Math.round(sum / cells.length)
 }
 
+export type LocaleOverview = {
+  locale: string
+  /** Mean score over `pathCount` paths; missing mirrors count as 0 (same rule as row Avg). */
+  averageScore: number | null
+  presentCount: number
+  missingCount: number
+  pathCount: number
+}
+
+/** Per-locale column average for a path set (e.g. full matrix or filtered rows). */
+export function computeLocaleOverviews(
+  paths: string[],
+  locales: string[],
+  missingSet: Set<string>,
+  metaCounts: Map<string, number>,
+  staleSet: Set<string>,
+): LocaleOverview[] {
+  if (paths.length === 0) {
+    return locales.map((locale) => ({
+      locale,
+      averageScore: null,
+      presentCount: 0,
+      missingCount: 0,
+      pathCount: 0,
+    }))
+  }
+  return locales.map((locale) => {
+    let sum = 0
+    let presentCount = 0
+    let missingCount = 0
+    for (const path of paths) {
+      const c = getLocaleCellScore(path, locale, missingSet, metaCounts, staleSet)
+      sum += c.score ?? 0
+      if (c.missing) missingCount++
+      else presentCount++
+    }
+    return {
+      locale,
+      averageScore: Math.round(sum / paths.length),
+      presentCount,
+      missingCount,
+      pathCount: paths.length,
+    }
+  })
+}
+
 export function scoreCellClass(score: number | null, missing: boolean): string {
   if (missing) {
     return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'

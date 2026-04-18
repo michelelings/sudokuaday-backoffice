@@ -24,6 +24,9 @@ export function AnalyticsLayout() {
         <NavLink to="." end className={subNavClass}>
           Overview
         </NavLink>
+        <NavLink to="pages" className={subNavClass}>
+          Pages
+        </NavLink>
         <NavLink to="traffic" className={subNavClass}>
           Traffic
         </NavLink>

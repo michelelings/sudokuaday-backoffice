@@ -85,6 +85,12 @@ export function AnalyticsOverviewPage() {
         <h2 className="font-semibold">Snapshot contents</h2>
         <ul className="mt-3 list-inside list-disc space-y-1 text-slate-600 dark:text-slate-400">
           <li>
+            <Link to="/analytics/pages" className="font-medium text-slate-900 underline dark:text-slate-100">
+              Pages
+            </Link>
+            : merged paths from GA4 / GSC / SEO (see table)
+          </li>
+          <li>
             <Link to="/analytics/traffic" className="font-medium text-slate-900 underline dark:text-slate-100">
               Traffic
             </Link>
