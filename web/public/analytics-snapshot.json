@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": null,
+  "sources": {
+    "ga4": { "configured": false },
+    "gsc": { "configured": false },
+    "seo": { "configured": false, "vendor": null }
+  },
+  "traffic": null,
+  "searchConsole": null,
+  "seo": null
+}

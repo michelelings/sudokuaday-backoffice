@@ -15,7 +15,9 @@ export function RootLayout() {
         <div className="mx-auto flex max-w-[min(96rem,calc(100vw-2rem))] flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div className="flex flex-col">
             <span className="text-sm font-semibold">Sudoku a Day</span>
-            <span className="text-xs text-slate-500 dark:text-slate-400">Backoffice · read-only parity</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              Backoffice · parity (analytics UI prep, no live APIs)
+            </span>
           </div>
           <nav className="flex gap-1">
             <NavLink to="/" end className={linkClass}>
@@ -26,6 +28,9 @@ export function RootLayout() {
             </NavLink>
             <NavLink to="/coverage" className={linkClass}>
               Coverage
+            </NavLink>
+            <NavLink to="/analytics" className={linkClass}>
+              Analytics
             </NavLink>
           </nav>
         </div>

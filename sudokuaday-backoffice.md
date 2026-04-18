@@ -254,9 +254,9 @@ The site repo and traffic are **too important to risk** from tooling mistakes. D
 | **M1**    | Paired HTML paths + missing/extra; **metadata** diff (title, description, `h1`); sample capped in JSON for bundle size. | Done (`web/scripts/ingest-parity.mjs`).       |
 | **M2**    | Dashboard, filters, **CSV export**, **sitemap** orphan check, `/diff` view; **GitHub Action** refreshes snapshot.       | Done (`.github/workflows/ingest-parity.yml`). |
 | **M3**    | Stale mirrors (git-based lag vs locale), run history in snapshot, CI clone depth for accurate times.                      | Done.                                         |
-| **M4**    | GA4 connector + traffic by locale/path.                                                                                 | Not started.                                  |
-| **M5**    | GSC connector + landing/query views.                                                                                    | Not started.                                  |
-| **M6**    | Ahrefs *or* Semrush summary.                                                                                            | Not started.                                  |
+| **M4**    | GA4 connector + traffic by locale/path.                                                                                 | Prep: `analytics-snapshot.json`, Traffic tab, safe loader.      |
+| **M5**    | GSC connector + landing/query views.                                                                                    | Prep: Search Console tab, schema for queries/pages.               |
+| **M6**    | Ahrefs *or* Semrush summary.                                                                                            | Prep: SEO vendor tab, schema stub.                              |
 
 
 ---

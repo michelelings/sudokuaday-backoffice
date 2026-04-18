@@ -185,12 +185,18 @@ export function DashboardPage() {
             </tbody>
           </table>
         </div>
-        <p className="mt-4">
+        <p className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
           <Link
             to="/parity"
             className="text-sm font-medium text-slate-900 underline decoration-slate-300 underline-offset-4 hover:decoration-slate-900 dark:text-slate-100 dark:decoration-slate-600 dark:hover:decoration-slate-100"
           >
             Browse and export issues →
+          </Link>
+          <Link
+            to="/analytics"
+            className="text-sm font-medium text-slate-900 underline decoration-slate-300 underline-offset-4 hover:decoration-slate-900 dark:text-slate-100 dark:decoration-slate-600 dark:hover:decoration-slate-100"
+          >
+            Analytics and SEO (prep) →
           </Link>
         </p>
       </div>
