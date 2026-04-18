@@ -38,6 +38,19 @@ export function localeLiveUrl(locale: string, englishRepoPath: string): string {
   return `${origin}/${loc}${pathname}`
 }
 
+/** Public pathname for a parity row: English uses bare paths; mirrors use `/{locale}/…`. */
+export function publicPathnameForSitePage(
+  locale: string,
+  defaultLocale: string,
+  englishRepoPath: string,
+): string {
+  const pathname = repoHtmlPathToUrlPath(englishRepoPath)
+  if (locale === defaultLocale) return pathname
+  const loc = locale.replace(/^\/+|\/+$/g, '')
+  if (pathname === '/') return `/${loc}/`
+  return `/${loc}${pathname}`
+}
+
 /** Styling for links that open the public site (opens in new tab). */
 export const liveSiteLinkClassName =
   'text-sky-800 no-underline hover:opacity-90 dark:text-sky-300 dark:hover:opacity-90'

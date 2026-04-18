@@ -88,7 +88,7 @@ export function AnalyticsOverviewPage() {
             <Link to="/analytics/pages" className="font-medium text-slate-900 underline dark:text-slate-100">
               Pages
             </Link>
-            : merged paths from GA4 / GSC / SEO (see table)
+            : full URL inventory from parity (English HTML × locales) with GA / GSC / SEO columns
           </li>
           <li>
             <Link to="/analytics/traffic" className="font-medium text-slate-900 underline dark:text-slate-100">

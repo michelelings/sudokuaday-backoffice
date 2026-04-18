@@ -50,8 +50,47 @@ export function gscPagesToCsv(rows: GscPageRow[]): string {
   return lines.join('\n')
 }
 
+/** One row per English file; columns `en_ga`, `en_gsc`, `en_seo`, … per locale (seo = text summary). */
+export function pageScoreboardMatrixToCsv(
+  matrix: { englishRepoPath: string; byLocale: Map<string, PageScoreboardRow> }[],
+  locales: string[],
+  seoVendorLabel: string,
+): string {
+  const gaCell = (r?: PageScoreboardRow): string =>
+    r?.ga4?.metricTotals.map((m) => `${m.metric_key}=${m.value}`).join('; ') ?? ''
+  const gscCell = (r?: PageScoreboardRow): string =>
+    r?.gsc ? `${r.gsc.clicks}/${r.gsc.impressions}` : ''
+  const seoCell = (r?: PageScoreboardRow): string => {
+    if (!r?.seo) return ''
+    const pos = r.seo.bestPosition != null ? String(r.seo.bestPosition) : ''
+    const vol = r.seo.volumeSum > 0 ? String(r.seo.volumeSum) : ''
+    return [pos, String(r.seo.keywordCount), vol].filter(Boolean).join('|')
+  }
+
+  const headers = ['english_repo_path']
+  for (const loc of locales) {
+    const safe = loc.replace(/[^\w-]+/g, '_')
+    headers.push(`${safe}_ga`, `${safe}_gsc`, `${safe}_seo`)
+  }
+  headers.push('seo_vendor')
+  const lines = [headers.join(',')]
+
+  for (const { englishRepoPath, byLocale } of matrix) {
+    const cells = [esc(englishRepoPath)]
+    for (const loc of locales) {
+      const r = byLocale.get(loc)
+      cells.push(esc(gaCell(r)), esc(gscCell(r)), esc(seoCell(r)))
+    }
+    cells.push(esc(seoVendorLabel))
+    lines.push(cells.join(','))
+  }
+  return lines.join('\n')
+}
+
 export function pageScoreboardToCsv(rows: PageScoreboardRow[], seoVendorLabel: string): string {
+  const hasParityCols = rows.some((r) => r.siteLocale != null || r.englishRepoPath != null)
   const headers = [
+    ...(hasParityCols ? (['site_locale', 'english_repo_path'] as const) : []),
     'path',
     'ga4_metrics',
     'gsc_clicks',
@@ -65,8 +104,12 @@ export function pageScoreboardToCsv(rows: PageScoreboardRow[], seoVendorLabel: s
   for (const r of rows) {
     const ga =
       r.ga4?.metricTotals.map((m) => `${m.metric_key}=${m.value}`).join('; ') ?? ''
+    const parityPrefix = hasParityCols
+      ? [esc(r.siteLocale ?? ''), esc(r.englishRepoPath ?? '')]
+      : []
     lines.push(
       [
+        ...parityPrefix,
         esc(r.path),
         esc(ga),
         r.gsc ? String(r.gsc.clicks) : '',
