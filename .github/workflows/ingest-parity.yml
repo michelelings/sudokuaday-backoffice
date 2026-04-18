@@ -1,0 +1,47 @@
+# Read-only: clones sudokuaday.com, runs parity ingest, commits updated snapshot for the SPA.
+# Does not push to or modify the website repo.
+
+name: Ingest parity snapshot
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 6 * * *' # daily 06:00 UTC
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Clone sudokuaday.com (read-only)
+        run: git clone --depth 1 https://github.com/jipvandervelde/sudokuaday.com /tmp/sudokuaday-site
+
+      - name: Install web dependencies
+        run: npm ci --prefix web
+
+      - name: Run ingest
+        run: |
+          export SUDOKUADAY_REPO_PATH=/tmp/sudokuaday-site
+          export SUDOKUADAY_REPO_SHA="$(git -C /tmp/sudokuaday-site rev-parse HEAD)"
+          npm run ingest --prefix web
+
+      - name: Commit snapshot if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/public/parity-snapshot.json
+          if git diff --staged --quiet; then
+            echo "No snapshot changes."
+          else
+            git commit -m "chore: refresh parity snapshot from sudokuaday.com main"
+            git push
+          fi
