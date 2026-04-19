@@ -7,7 +7,7 @@ on:
   workflow_dispatch: {}
   schedule:
     # Four runs per day, spaced for Amsterdam (CET/CEST). GitHub cron is UTC-only; local time shifts by 1h at DST.
-    # 07/11/15/19 UTC → ~08–09 / 12–13 / 16–17 / 20–21 Europe/Amsterdam (approx.).
+    # Hours must match web/src/lib/parityIngestSchedule.ts (PARITY_INGEST_HOURS_UTC).
     # Immediate refresh: Actions → this workflow → “Run workflow”.
     - cron: '0 7,11,15,19 * * *'
 
