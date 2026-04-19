@@ -16,10 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      # Use Node 24 for @actions/* until it is the default (avoids deprecated Node 20 runtime warning).
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: npm
@@ -39,7 +42,10 @@ jobs:
           npm run ingest --prefix web
 
       - name: Commit snapshot if changed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add web/public/parity-snapshot.json
@@ -47,5 +53,6 @@ jobs:
             echo "No snapshot changes."
           else
             git commit -m "chore: refresh parity snapshot from sudokuaday.com main"
-            git push
+            # Explicit HTTPS push avoids intermittent auth (exit 128) when the credential helper is not used.
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF_NAME}"
           fi
