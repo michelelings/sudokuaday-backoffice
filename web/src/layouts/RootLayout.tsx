@@ -1,5 +1,4 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { SnapshotStatus } from '../components/SnapshotStatus'
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   [
@@ -20,7 +19,6 @@ export function RootLayout() {
               Backoffice · parity (analytics UI prep, no live APIs)
             </span>
           </div>
-          <SnapshotStatus />
           <nav className="flex gap-1">
             <NavLink to="/" end className={linkClass}>
               Dashboard

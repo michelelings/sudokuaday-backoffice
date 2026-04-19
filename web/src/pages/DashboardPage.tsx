@@ -12,6 +12,7 @@ import {
 import { liveSiteLinkClassName, localeLiveUrl } from '../lib/siteUrls'
 import { metadataTotal, staleMirrorTotal } from '../lib/issues'
 import { SnapshotScheduleDetails } from '../components/SnapshotScheduleDetails'
+import { SyncParityButton } from '../components/SyncParityButton'
 
 export function DashboardPage() {
   const q = useQuery({
@@ -97,7 +98,8 @@ export function DashboardPage() {
         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
           <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Snapshot</dt>
           <dd className="mt-1">
-            <SnapshotScheduleDetails generatedAt={data.generatedAt} variant="dashboard" />
+            <SnapshotScheduleDetails generatedAt={data.generatedAt} />
+            <SyncParityButton />
           </dd>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
