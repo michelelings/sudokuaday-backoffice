@@ -1,5 +1,10 @@
 # Read-only: clones sudokuaday.com, runs parity ingest, commits updated snapshot for the SPA.
 # Does not push to or modify the website repo.
+#
+# The site repo (jipvandervelde/sudokuaday.com) is private. actions/checkout must use a PAT:
+#   Repo → Settings → Secrets and variables → Actions → New repository secret
+#   Name: SUDOKUADAY_COM_REPO_PAT
+#   Value: fine-grained PAT with Contents: Read on jipvandervelde/sudokuaday.com (or classic PAT with repo scope).
 
 name: Ingest parity snapshot
 
@@ -22,11 +27,17 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # Authenticated checkout avoids anonymous git clone rate limits; persist-credentials: false so this
-      # checkout does not replace the credential helper used to push commits to this repo (fixes exit 128).
+      - name: Require PAT for private sudokuaday.com checkout
+        if: ${{ secrets.SUDOKUADAY_COM_REPO_PAT == '' }}
+        run: |
+          echo '::error::Add Actions secret SUDOKUADAY_COM_REPO_PAT (read-only PAT for jipvandervelde/sudokuaday.com). See workflow header comment.'
+          exit 1
+
+      # persist-credentials: false so this checkout does not replace credentials used to push to this repo.
       - uses: actions/checkout@v6
         with:
           repository: jipvandervelde/sudokuaday.com
+          token: ${{ secrets.SUDOKUADAY_COM_REPO_PAT }}
           path: _sudokuaday-site
           fetch-depth: 400
           persist-credentials: false
