@@ -1,14 +1,48 @@
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { fetchParitySnapshot } from '../api/parity'
+import { buildMissingMirrorSet, getEnglishPathRows } from '../lib/coverageMatrix'
+import {
+  buildMetadataCountByLocalePath,
+  buildStaleLocalePathSet,
+  computeLocaleOverviews,
+  scoreCellClass,
+} from '../lib/pageScores'
 import { liveSiteLinkClassName, localeLiveUrl } from '../lib/siteUrls'
 import { metadataTotal, staleMirrorTotal } from '../lib/issues'
+import { SnapshotScheduleDetails } from '../components/SnapshotScheduleDetails'
 
 export function DashboardPage() {
   const q = useQuery({
     queryKey: ['parity-snapshot'],
     queryFn: fetchParitySnapshot,
   })
+
+  const missingSet = useMemo(() => (q.data ? buildMissingMirrorSet(q.data) : new Set<string>()), [q.data])
+
+  const metaCounts = useMemo(
+    () => (q.data ? buildMetadataCountByLocalePath(q.data) : new Map<string, number>()),
+    [q.data],
+  )
+
+  const staleSet = useMemo(
+    () => (q.data ? buildStaleLocalePathSet(q.data) : new Set<string>()),
+    [q.data],
+  )
+
+  const { rows } = useMemo(
+    () => (q.data ? getEnglishPathRows(q.data) : { rows: [] as string[], partial: false }),
+    [q.data],
+  )
+
+  const localeOverviews = useMemo(
+    () =>
+      q.data
+        ? computeLocaleOverviews(rows, q.data.nonDefaultLocales, missingSet, metaCounts, staleSet)
+        : [],
+    [q.data, rows, missingSet, metaCounts, staleSet],
+  )
 
   if (q.isPending) {
     return <p className="text-slate-600 dark:text-slate-400">Loading snapshot…</p>
@@ -62,8 +96,8 @@ export function DashboardPage() {
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
           <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Snapshot</dt>
-          <dd className="mt-1 text-sm font-medium leading-snug">
-            {new Date(data.generatedAt).toLocaleString()}
+          <dd className="mt-1">
+            <SnapshotScheduleDetails generatedAt={data.generatedAt} variant="dashboard" />
           </dd>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
@@ -102,6 +136,74 @@ export function DashboardPage() {
           </dd>
         </div>
       </dl>
+
+      <section
+        aria-labelledby="dashboard-locale-scores-heading"
+        className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
+      >
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 id="dashboard-locale-scores-heading" className="text-lg font-semibold tracking-tight">
+              Scores by language
+            </h2>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Average mirror score across all English paths in the coverage matrix (same formula as each locale column:
+              missing pages count as 0). See the{' '}
+              <Link
+                to="/coverage"
+                className="font-medium text-slate-900 no-underline hover:text-slate-700 dark:text-slate-100 dark:hover:text-slate-300"
+              >
+                coverage matrix
+              </Link>{' '}
+              for per-path detail.
+            </p>
+          </div>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7">
+          {localeOverviews.map((o) => {
+            const score = o.averageScore
+            const title = `${o.presentCount} mirrored · ${o.missingCount} missing · ${o.pathCount} paths`
+            return (
+              <div
+                key={o.locale}
+                className="rounded-lg border border-slate-100 bg-slate-50/80 px-3 py-3 dark:border-slate-800 dark:bg-slate-950/50"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <a
+                    href={localeLiveUrl(o.locale, 'index.html')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`${liveSiteLinkClassName} font-mono text-sm font-semibold`}
+                    title={`Open ${o.locale} homepage`}
+                  >
+                    {o.locale}
+                  </a>
+                  {score == null ? (
+                    <span className="text-xs text-slate-400">—</span>
+                  ) : (
+                    <span
+                      className={`inline-flex min-w-[2.75rem] justify-center rounded px-2 py-0.5 text-sm font-semibold tabular-nums ${scoreCellClass(score, false)}`}
+                      title={title}
+                    >
+                      {score}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-2 text-[11px] leading-snug text-slate-500 dark:text-slate-400" title={title}>
+                  {o.pathCount === 0 ? (
+                    'No paths in view'
+                  ) : (
+                    <>
+                      <span className="tabular-nums text-slate-700 dark:text-slate-300">{o.presentCount}</span> present
+                      · <span className="tabular-nums text-slate-700 dark:text-slate-300">{o.missingCount}</span> missing
+                    </>
+                  )}
+                </p>
+              </div>
+            )
+          })}
+        </div>
+      </section>
 
       {data.repoPath ? (
         <p className="text-xs text-slate-500 dark:text-slate-400">
