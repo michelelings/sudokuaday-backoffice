@@ -22,30 +22,34 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # Authenticated checkout avoids anonymous git clone rate limits; persist-credentials: false so this
+      # checkout does not replace the credential helper used to push commits to this repo (fixes exit 128).
+      - uses: actions/checkout@v6
+        with:
+          repository: jipvandervelde/sudokuaday.com
+          path: _sudokuaday-site
+          fetch-depth: 400
+          persist-credentials: false
+
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: web/package-lock.json
 
-      # Enough history for per-file commit times in stale-mirror detection (depth 1 = all files share one timestamp).
-      - name: Clone sudokuaday.com (read-only)
-        run: git clone --depth 400 https://github.com/jipvandervelde/sudokuaday.com /tmp/sudokuaday-site
-
       - name: Install web dependencies
         run: npm ci --prefix web
 
       - name: Run ingest
         run: |
-          export SUDOKUADAY_REPO_PATH=/tmp/sudokuaday-site
-          export SUDOKUADAY_REPO_SHA="$(git -C /tmp/sudokuaday-site rev-parse HEAD)"
+          export SUDOKUADAY_REPO_PATH="${GITHUB_WORKSPACE}/_sudokuaday-site"
+          export SUDOKUADAY_REPO_SHA="$(git -C "${GITHUB_WORKSPACE}/_sudokuaday-site" rev-parse HEAD)"
           npm run ingest --prefix web
 
       - name: Commit snapshot if changed
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add web/public/parity-snapshot.json
@@ -53,6 +57,5 @@ jobs:
             echo "No snapshot changes."
           else
             git commit -m "chore: refresh parity snapshot from sudokuaday.com main"
-            # Explicit HTTPS push avoids intermittent auth (exit 128) when the credential helper is not used.
-            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF_NAME}"
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${{ github.ref_name }}"
           fi
