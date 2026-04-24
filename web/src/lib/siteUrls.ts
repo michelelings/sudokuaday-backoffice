@@ -53,7 +53,11 @@ export function publicPathnameForSitePage(
 
 /** Styling for links that open the public site (opens in new tab). */
 export const liveSiteLinkClassName =
-  'text-sky-800 no-underline hover:opacity-90 dark:text-sky-300 dark:hover:opacity-90'
+  'text-sky-800 no-underline [@media(hover:hover)]:hover:opacity-90 dark:text-sky-300 dark:[@media(hover:hover)]:hover:opacity-90'
+
+/** In-app / router links (same tab). */
+export const internalLinkClassName =
+  'font-medium text-slate-900 no-underline [@media(hover:hover)]:hover:text-slate-700 dark:text-slate-100 dark:[@media(hover:hover)]:hover:text-slate-300'
 
 /** If value is already absolute http(s), return it; else treat as pathname or path segment. */
 export function hrefFromSnapshotPathOrUrl(pathOrUrl: string): string {

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { fetchAnalyticsSnapshot } from '../../api/analytics'
 import { seoKeywordsToCsv } from '../../lib/analyticsCsv'
+import { secondaryButtonClassName } from '../../lib/formControls'
 import { downloadTextFile } from '../../lib/issues'
 import { hrefFromSnapshotPathOrUrl, liveSiteLinkClassName } from '../../lib/siteUrls'
 
@@ -54,7 +55,7 @@ export function AnalyticsSeoPage() {
               'text/csv;charset=utf-8',
             )
           }
-          className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
+          className={secondaryButtonClassName}
         >
           Export CSV
         </button>

@@ -1,41 +1,56 @@
+import { type MouseEvent } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
+import { mainNavLinkClass } from '../lib/navLinkClasses'
 
-const linkClass = ({ isActive }: { isActive: boolean }) =>
-  [
-    'rounded-md px-3 py-2 text-sm font-medium transition-colors',
-    isActive
-      ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-      : 'text-slate-600 hover:bg-slate-200/80 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
-  ].join(' ')
+function skipToMain(e: MouseEvent<HTMLAnchorElement>) {
+  e.preventDefault()
+  const el = document.getElementById('main-content')
+  if (!el) return
+  const reduce =
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  el.focus()
+  el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
+}
 
 export function RootLayout() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+      <a
+        href="#main-content"
+        onClick={skipToMain}
+        className="fixed left-4 top-0 z-[var(--z-skip-link)] -translate-y-full rounded-b-md border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-900 shadow transition-transform duration-150 ease-out focus:translate-y-0 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+      >
+        Skip to main content
+      </a>
+      <header className="border-b border-slate-200 bg-white shadow-[0_0_0_1px_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-slate-900 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.06)]">
         <div className="mx-auto flex max-w-[min(96rem,calc(100vw-2rem))] flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div className="flex flex-col">
             <span className="text-sm font-semibold">Sudoku a Day</span>
-            <span className="text-xs text-slate-500 dark:text-slate-400">
+            <span className="text-xs tracking-wide text-slate-500 dark:text-slate-400">
               Backoffice · parity (analytics UI prep, no live APIs)
             </span>
           </div>
-          <nav className="flex gap-1">
-            <NavLink to="/" end className={linkClass}>
+          <nav className="flex flex-wrap gap-1" aria-label="Primary">
+            <NavLink to="/" end className={mainNavLinkClass}>
               Dashboard
             </NavLink>
-            <NavLink to="/parity" className={linkClass}>
+            <NavLink to="/parity" className={mainNavLinkClass}>
               Parity issues
             </NavLink>
-            <NavLink to="/coverage" className={linkClass}>
+            <NavLink to="/coverage" className={mainNavLinkClass}>
               Coverage
             </NavLink>
-            <NavLink to="/analytics" className={linkClass}>
+            <NavLink to="/analytics" className={mainNavLinkClass}>
               Analytics
             </NavLink>
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-[min(96rem,calc(100vw-2rem))] px-4 py-8">
+      <main
+        id="main-content"
+        className="mx-auto max-w-[min(96rem,calc(100vw-2rem))] scroll-mt-4 px-4 py-8 focus:outline-none"
+        tabIndex={-1}
+      >
         <Outlet />
       </main>
     </div>

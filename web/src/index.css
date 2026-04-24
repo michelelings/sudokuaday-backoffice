@@ -2,9 +2,62 @@
 
 @theme {
   --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --z-skip-link: 500;
 }
 
-body {
-  margin: 0;
-  font-family: var(--font-sans);
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    padding-inline: max(0px, env(safe-area-inset-left)) max(0px, env(safe-area-inset-right));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  :where(button, [type='button'], [type='submit'], a, input, select, textarea) {
+    touch-action: manipulation;
+  }
+
+  :where(
+      a:not([class*='focus-visible:']):not([class*='sr-only']),
+      button:not([class*='focus-visible:']),
+      input,
+      select,
+      textarea
+    ):focus-visible {
+    outline: 2px solid rgb(15 23 42 / 0.4);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :where(
+        a:not([class*='focus-visible:']):not([class*='sr-only']),
+        button:not([class*='focus-visible:']),
+        input,
+        select,
+        textarea
+      ):focus-visible {
+      outline-color: rgb(226 232 240 / 0.45);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }

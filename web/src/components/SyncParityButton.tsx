@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useState } from 'react'
 import { PARITY_INGEST_WORKFLOW_URL, triggerParityIngest } from '../api/sync'
+import { smallPrimaryButtonClassName } from '../lib/formControls'
 
 export function SyncParityButton() {
   const qc = useQueryClient()
@@ -37,7 +38,7 @@ export function SyncParityButton() {
         type="button"
         onClick={onClick}
         disabled={busy}
-        className="w-full rounded-lg bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+        className={smallPrimaryButtonClassName}
       >
         {busy ? 'Starting…' : 'Sync snapshot now'}
       </button>
@@ -47,7 +48,7 @@ export function SyncParityButton() {
           href={PARITY_INGEST_WORKFLOW_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-medium text-slate-700 underline-offset-2 hover:underline dark:text-slate-300"
+          className="font-medium text-slate-700 underline-offset-2 [@media(hover:hover)]:hover:underline dark:text-slate-300"
         >
           Open workflow
         </a>

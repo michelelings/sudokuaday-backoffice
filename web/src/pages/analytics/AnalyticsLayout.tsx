@@ -1,12 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
-
-const subNavClass = ({ isActive }: { isActive: boolean }) =>
-  [
-    'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-    isActive
-      ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-      : 'text-slate-600 hover:bg-slate-200/80 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
-  ].join(' ')
+import { analyticsSubNavLinkClass } from '../../lib/navLinkClasses'
 
 export function AnalyticsLayout() {
   return (
@@ -20,20 +13,20 @@ export function AnalyticsLayout() {
           real connector output in CI or a BFF. Missing or invalid JSON still loads safely (empty snapshot).
         </p>
       </div>
-      <nav className="flex flex-wrap gap-1 border-b border-slate-200 pb-2 dark:border-slate-800">
-        <NavLink to="." end className={subNavClass}>
+      <nav className="flex flex-wrap gap-1 border-b border-slate-200 pb-2 dark:border-slate-800" aria-label="Analytics sections">
+        <NavLink to="." end className={analyticsSubNavLinkClass}>
           Overview
         </NavLink>
-        <NavLink to="pages" className={subNavClass}>
+        <NavLink to="pages" className={analyticsSubNavLinkClass}>
           Pages
         </NavLink>
-        <NavLink to="traffic" className={subNavClass}>
+        <NavLink to="traffic" className={analyticsSubNavLinkClass}>
           Traffic
         </NavLink>
-        <NavLink to="search-console" className={subNavClass}>
+        <NavLink to="search-console" className={analyticsSubNavLinkClass}>
           Search Console
         </NavLink>
-        <NavLink to="seo" className={subNavClass}>
+        <NavLink to="seo" className={analyticsSubNavLinkClass}>
           SEO vendor
         </NavLink>
       </nav>

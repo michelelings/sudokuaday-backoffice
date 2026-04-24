@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { fetchAnalyticsSnapshot } from '../../api/analytics'
 import { trafficSeriesToCsv } from '../../lib/analyticsCsv'
+import { formControlClassName, secondaryButtonClassName } from '../../lib/formControls'
 import { downloadTextFile } from '../../lib/issues'
 
 export function AnalyticsTrafficPage() {
@@ -69,7 +70,7 @@ export function AnalyticsTrafficPage() {
           <select
             value={localeFilter}
             onChange={(e) => setLocaleFilter(e.target.value)}
-            className="min-w-[10rem] rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+            className={`min-w-[10rem] ${formControlClassName}`}
           >
             <option value="">All</option>
             {localeOptions.map((loc) => (
@@ -84,11 +85,7 @@ export function AnalyticsTrafficPage() {
             {filteredSeries.length} row{filteredSeries.length === 1 ? '' : 's'}
             {localeFilter ? ` · ${localeFilter}` : ''}
           </p>
-          <button
-            type="button"
-            onClick={exportCsv}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-          >
+          <button type="button" onClick={exportCsv} className={secondaryButtonClassName}>
             Export CSV
           </button>
         </div>

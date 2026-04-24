@@ -11,6 +11,7 @@ import {
   staleMirrorTotal,
   type IssueCategory,
 } from '../lib/issues'
+import { formControlClassName, secondaryButtonClassName } from '../lib/formControls'
 import {
   englishLiveUrl,
   hrefFromSnapshotPathOrUrl,
@@ -82,7 +83,7 @@ export function ParityIssuesPage() {
               setCategory(v)
               if (v !== 'all' && v !== 'path') setPathType('')
             }}
-            className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+            className={`min-w-[8rem] ${formControlClassName}`}
           >
             <option value="all">All</option>
             <option value="path">Path only</option>
@@ -96,7 +97,7 @@ export function ParityIssuesPage() {
           <select
             value={localeFilter}
             onChange={(e) => setLocaleFilter(e.target.value)}
-            className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+            className={`min-w-[8rem] ${formControlClassName}`}
           >
             <option value="">All</option>
             {data.nonDefaultLocales.map((l) => (
@@ -112,7 +113,7 @@ export function ParityIssuesPage() {
             <select
               value={pathType}
               onChange={(e) => setPathType(e.target.value as '' | 'missing' | 'extra')}
-              className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              className={`min-w-[8rem] ${formControlClassName}`}
             >
               <option value="">Both</option>
               <option value="missing">missing</option>
@@ -120,20 +121,22 @@ export function ParityIssuesPage() {
             </select>
           </label>
         )}
-        <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-400">
+        <label
+          className="flex min-w-[12rem] flex-1 flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-400"
+          htmlFor="parity-issue-search"
+        >
           Path / URL contains
           <input
+            id="parity-issue-search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="e.g. sudoku-strategies"
-            className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+            spellCheck={false}
+            autoComplete="off"
+            className={formControlClassName}
           />
         </label>
-        <button
-          type="button"
-          onClick={exportCsv}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-        >
+        <button type="button" onClick={exportCsv} className={secondaryButtonClassName}>
           Export CSV
         </button>
       </div>
@@ -235,7 +238,7 @@ export function ParityIssuesPage() {
                         </a>
                         <Link
                           to={to}
-                          className="font-medium text-violet-800 no-underline hover:text-violet-950 dark:text-violet-300 dark:hover:text-violet-200"
+                          className="font-medium text-violet-800 no-underline [@media(hover:hover)]:hover:text-violet-950 dark:text-violet-300 dark:[@media(hover:hover)]:hover:text-violet-200"
                         >
                           Diff
                         </Link>

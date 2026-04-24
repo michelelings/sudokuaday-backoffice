@@ -10,6 +10,7 @@ import {
   rowAverageScore,
   scoreCellClass,
 } from '../lib/pageScores'
+import { formControlClassName } from '../lib/formControls'
 import { englishLiveUrl, liveSiteLinkClassName, localeLiveUrl } from '../lib/siteUrls'
 
 export function ParityCoveragePage() {
@@ -117,13 +118,19 @@ export function ParityCoveragePage() {
       )}
 
       <div className="flex flex-wrap items-end gap-3">
-        <label className="flex min-w-[12rem] flex-1 flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-400">
+        <label
+          className="flex min-w-[12rem] flex-1 flex-col gap-1 text-xs font-medium text-slate-600 dark:text-slate-400"
+          htmlFor="coverage-path-filter"
+        >
           Filter path
           <input
+            id="coverage-path-filter"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="e.g. blog/"
-            className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+            spellCheck={false}
+            autoComplete="off"
+            className={formControlClassName}
           />
         </label>
         <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -131,7 +138,7 @@ export function ParityCoveragePage() {
         </p>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-[0_0_0_1px_rgba(15,23,42,0.05)] dark:border-slate-800 dark:bg-slate-900 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.05)]">
         <table className="min-w-full border-collapse text-left text-xs">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/80">
@@ -167,7 +174,10 @@ export function ParityCoveragePage() {
               )
               const avg = rowAverageScore(localeCells)
               return (
-                <tr key={path} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
+                <tr
+                  key={path}
+                  className="group [@media(hover:hover)]:hover:bg-slate-50/80 dark:[@media(hover:hover)]:hover:bg-slate-800/40"
+                >
                   <th
                     scope="row"
                     className="sticky left-0 z-10 w-[28rem] min-w-[28rem] max-w-[28rem] truncate border-r border-slate-200 bg-white px-3 py-1.5 font-normal shadow-[2px_0_6px_-4px_rgba(0,0,0,0.08)] group-hover:bg-slate-50/80 dark:border-slate-800 dark:bg-slate-900 dark:shadow-[2px_0_6px_-4px_rgba(0,0,0,0.35)] dark:group-hover:bg-slate-800/40"

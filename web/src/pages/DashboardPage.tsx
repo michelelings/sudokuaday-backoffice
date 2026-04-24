@@ -9,7 +9,7 @@ import {
   computeLocaleOverviews,
   scoreCellClass,
 } from '../lib/pageScores'
-import { liveSiteLinkClassName, localeLiveUrl } from '../lib/siteUrls'
+import { internalLinkClassName, liveSiteLinkClassName, localeLiveUrl } from '../lib/siteUrls'
 import { metadataTotal, staleMirrorTotal } from '../lib/issues'
 import { SnapshotScheduleDetails } from '../components/SnapshotScheduleDetails'
 import { SyncParityButton } from '../components/SyncParityButton'
@@ -88,40 +88,40 @@ export function DashboardPage() {
 
       <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">English HTML paths</dt>
+          <dt className="text-xs font-medium uppercase tracking-wider text-slate-500">English HTML paths</dt>
           <dd className="mt-1 text-2xl font-semibold tabular-nums">{data.englishHtmlCount}</dd>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Locales</dt>
+          <dt className="text-xs font-medium uppercase tracking-wider text-slate-500">Locales</dt>
           <dd className="mt-1 text-2xl font-semibold tabular-nums">{data.nonDefaultLocales.length}</dd>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Snapshot</dt>
+          <dt className="text-xs font-medium uppercase tracking-wider text-slate-500">Snapshot</dt>
           <dd className="mt-1">
             <SnapshotScheduleDetails generatedAt={data.generatedAt} />
             <SyncParityButton />
           </dd>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Path issues (missing/extra)</dt>
+          <dt className="text-xs font-medium uppercase tracking-wider text-slate-500">Path issues (missing/extra)</dt>
           <dd className="mt-1 text-2xl font-semibold tabular-nums text-red-700 dark:text-red-400">{pathIssueCount}</dd>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Metadata mismatches</dt>
+          <dt className="text-xs font-medium uppercase tracking-wider text-slate-500">Metadata mismatches</dt>
           <dd className="mt-1 text-2xl font-semibold tabular-nums text-violet-700 dark:text-violet-400">{metaCount}</dd>
           {data.metadataIssuesCapped ? (
             <dd className="mt-1 text-xs text-slate-500">Issue table stores a sample; total above is full count.</dd>
           ) : null}
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Stale mirrors</dt>
+          <dt className="text-xs font-medium uppercase tracking-wider text-slate-500">Stale mirrors</dt>
           <dd className="mt-1 text-2xl font-semibold tabular-nums text-cyan-800 dark:text-cyan-300">{staleCount}</dd>
           {data.freshnessIssuesCapped ? (
             <dd className="mt-1 text-xs text-slate-500">Stored list capped; total above is full count.</dd>
           ) : null}
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4 sm:col-span-2 lg:col-span-3 dark:border-slate-800 dark:bg-slate-900">
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">Sitemap</dt>
+          <dt className="text-xs font-medium uppercase tracking-wider text-slate-500">Sitemap</dt>
           <dd className="mt-1 text-sm font-medium">
             {data.sitemap ? (
               <>
@@ -151,10 +151,7 @@ export function DashboardPage() {
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               Average mirror score across all English paths in the coverage matrix (same formula as each locale column:
               missing pages count as 0). See the{' '}
-              <Link
-                to="/coverage"
-                className="font-medium text-slate-900 no-underline hover:text-slate-700 dark:text-slate-100 dark:hover:text-slate-300"
-              >
+              <Link to="/coverage" className={internalLinkClassName}>
                 coverage matrix
               </Link>{' '}
               for per-path detail.
@@ -301,16 +298,10 @@ export function DashboardPage() {
           </table>
         </div>
         <p className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
-          <Link
-            to="/parity"
-            className="text-sm font-medium text-slate-900 no-underline hover:text-slate-700 dark:text-slate-100 dark:hover:text-slate-300"
-          >
+          <Link to="/parity" className={`text-sm ${internalLinkClassName}`}>
             Browse and export issues →
           </Link>
-          <Link
-            to="/analytics"
-            className="text-sm font-medium text-slate-900 no-underline hover:text-slate-700 dark:text-slate-100 dark:hover:text-slate-300"
-          >
+          <Link to="/analytics" className={`text-sm ${internalLinkClassName}`}>
             Analytics and SEO (prep) →
           </Link>
         </p>

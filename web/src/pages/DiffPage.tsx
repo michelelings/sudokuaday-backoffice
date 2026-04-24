@@ -1,7 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { fetchParitySnapshot } from '../api/parity'
-import { englishLiveUrl, liveSiteLinkClassName, localeLiveUrl } from '../lib/siteUrls'
+import { englishLiveUrl, internalLinkClassName, liveSiteLinkClassName, localeLiveUrl } from '../lib/siteUrls'
 
 export function DiffPage() {
   const [sp] = useSearchParams()
@@ -26,7 +26,8 @@ export function DiffPage() {
       <div className="space-y-4">
         <h1 className="text-2xl font-semibold tracking-tight">Metadata diff</h1>
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          Open this page from a <Link to="/parity" className="font-medium text-slate-800 hover:text-slate-600 dark:text-slate-200 dark:hover:text-slate-400">parity issue</Link> row (metadata link), or add{' '}
+          Open this page from a <Link to="/parity" className={internalLinkClassName}>parity issue</Link> row (metadata
+          link), or add{' '}
           <code className="rounded bg-black/10 px-1">?locale=de&amp;path=benefits-of-sudoku.html</code> to the URL.
         </p>
       </div>
@@ -40,7 +41,7 @@ export function DiffPage() {
     <div className="space-y-6">
       <div>
         <p className="text-xs text-slate-500">
-          <Link to="/parity" className="font-medium text-slate-800 hover:text-slate-600 dark:text-slate-200 dark:hover:text-slate-400">
+          <Link to="/parity" className={internalLinkClassName}>
             ← Parity issues
           </Link>
         </p>

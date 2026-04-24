@@ -9,6 +9,7 @@ import {
 } from '../../lib/analyticsPageMatrix'
 import { getEnglishPathRows } from '../../lib/coverageMatrix'
 import { pageScoreboardMatrixToCsv, pageScoreboardToCsv } from '../../lib/analyticsCsv'
+import { formControlClassName, secondaryButtonClassName } from '../../lib/formControls'
 import { downloadTextFile } from '../../lib/issues'
 import { englishLiveUrl, hrefFromSnapshotPathOrUrl, liveSiteLinkClassName } from '../../lib/siteUrls'
 
@@ -207,7 +208,7 @@ export function AnalyticsPagesPage() {
               <select
                 value={siteLocaleFilter}
                 onChange={(e) => setSiteLocaleFilter(e.target.value)}
-                className="min-w-[10rem] rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                className={`min-w-[10rem] ${formControlClassName}`}
               >
                 <option value="">All</option>
                 {(parityQ.data?.locales ?? []).map((loc) => (
@@ -223,7 +224,7 @@ export function AnalyticsPagesPage() {
             <select
               value={ga4LocaleFilter}
               onChange={(e) => setGa4LocaleFilter(e.target.value)}
-              className="min-w-[10rem] rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+              className={`min-w-[10rem] ${formControlClassName}`}
             >
               <option value="">All</option>
               {ga4LocaleOptions.map((loc) => (
@@ -249,11 +250,7 @@ export function AnalyticsPagesPage() {
             {siteLocaleFilter ? ` · ${siteLocaleFilter} only` : ''}
             {ga4LocaleFilter ? ` · GA4 ${ga4LocaleFilter}` : ''}
           </p>
-          <button
-            type="button"
-            onClick={exportCsv}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800"
-          >
+          <button type="button" onClick={exportCsv} className={secondaryButtonClassName}>
             Export CSV
           </button>
         </div>

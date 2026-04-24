@@ -1,4 +1,5 @@
 import { type ReactNode, useCallback, useState } from 'react'
+import { formControlClassName, primaryButtonClassName } from '../lib/formControls'
 
 const SESSION_KEY = 'sudokuaday-backoffice-auth'
 
@@ -66,13 +67,11 @@ export function AuthGate({ children }: Props) {
             name="password"
             type="password"
             autoComplete="current-password"
-            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+            spellCheck={false}
+            className={`w-full ${formControlClassName}`}
             required
           />
-          <button
-            type="submit"
-            className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
-          >
+          <button type="submit" className={primaryButtonClassName}>
             Continue
           </button>
         </form>
