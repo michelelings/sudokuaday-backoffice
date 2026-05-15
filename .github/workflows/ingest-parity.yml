@@ -1,15 +1,20 @@
 # Read-only: clones sudokuaday.com, runs parity ingest, commits updated snapshot for the SPA.
 # Does not push to or modify the website repo.
 #
-# The site repo (jipvandervelde/sudokuaday.com) is private. actions/checkout must use a PAT:
-#   Repo → Settings → Secrets and variables → Actions → New repository secret
-#   Name: SUDOKUADAY_COM_REPO_PAT
-#   Value: fine-grained PAT with Contents: Read on jipvandervelde/sudokuaday.com (or classic PAT with repo scope).
+# Secrets (this repo — michelelings/sudokuaday-backoffice → Settings → Actions):
+#   SUDOKUADAY_COM_REPO_PAT — read jipvandervelde/sudokuaday.com (private) for checkout.
+#   VERCEL_DEPLOY_HOOK_URL — optional; Production deploy hook URL (same pattern as letters-backoffice).
+#     After a new parity-snapshot.json is committed, we POST this so Vercel rebuilds immediately.
+#
+# Tight sync: add examples/sudokuaday-com-dispatch-backoffice-ingest.yml to the site repo on push main,
+# with secret there BACKOFFICE_REPO_DISPATCH_PAT (PAT with repo dispatch permission on THIS repo).
 
 name: Ingest parity snapshot
 
 on:
   workflow_dispatch: {}
+  repository_dispatch:
+    types: [sudokuaday-site-updated]
   schedule:
     # Four runs per day, spaced for Amsterdam (CET/CEST). GitHub cron is UTC-only; local time shifts by 1h at DST.
     # Hours must match web/src/lib/parityIngestSchedule.ts (PARITY_INGEST_HOURS_UTC).
@@ -58,6 +63,7 @@ jobs:
           npm run ingest --prefix web
 
       - name: Commit snapshot if changed
+        id: snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -66,7 +72,15 @@ jobs:
           git add web/public/parity-snapshot.json
           if git diff --staged --quiet; then
             echo "No snapshot changes."
+            echo "updated=false" >> "$GITHUB_OUTPUT"
           else
             git commit -m "chore: refresh parity snapshot from sudokuaday.com main"
             git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${{ github.ref_name }}"
+            echo "updated=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Trigger Vercel production deploy
+        if: ${{ steps.snapshot.outputs.updated == 'true' && secrets.VERCEL_DEPLOY_HOOK_URL != '' }}
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: curl -fsS -X POST "$HOOK"
